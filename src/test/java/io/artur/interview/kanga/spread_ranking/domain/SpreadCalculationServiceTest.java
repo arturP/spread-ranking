@@ -1,14 +1,16 @@
 package io.artur.interview.kanga.spread_ranking.domain;
 
 
+import io.artur.interview.kanga.spread_ranking.domain.model.Market;
+import io.artur.interview.kanga.spread_ranking.domain.model.Spread;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
-import static io.artur.interview.kanga.spread_ranking.domain.SpreadCategory.HIGH_SPREAD;
-import static io.artur.interview.kanga.spread_ranking.domain.SpreadCategory.LOW_SPREAD;
+import static io.artur.interview.kanga.spread_ranking.domain.model.SpreadCategory.HIGH_SPREAD;
+import static io.artur.interview.kanga.spread_ranking.domain.model.SpreadCategory.LOW_SPREAD;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class SpreadCalculationServiceTest {

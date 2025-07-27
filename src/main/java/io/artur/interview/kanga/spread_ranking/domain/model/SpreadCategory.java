@@ -1,4 +1,4 @@
-package io.artur.interview.kanga.spread_ranking.domain;
+package io.artur.interview.kanga.spread_ranking.domain.model;
 
 public enum SpreadCategory {
     LOW_SPREAD, // <= 2%
