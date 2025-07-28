@@ -8,7 +8,6 @@ import io.artur.interview.kanga.spread_ranking.infrastructure.external.dto.Kanga
 import io.artur.interview.kanga.spread_ranking.infrastructure.external.dto.KangaOrderBookResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.ResourceAccessException;
@@ -27,9 +26,8 @@ import static java.util.stream.Collectors.toList;
  * Client for communication with Kanga exchange
  */
 @Slf4j
-@Component
 @RequiredArgsConstructor
-class KangaApiClient implements ExchangeApiClient {
+public class KangaApiClient implements ExchangeApiClient {
 
     private static final String KANGA_BASE_URL = "https://public.kanga.exchange/api";
     private static final String MARKET_PAIRS_ENDPOINT = "/market/pairs";
@@ -45,13 +43,14 @@ class KangaApiClient implements ExchangeApiClient {
 
         for (int attempt = 1; attempt <= MAX_RETRIES; attempt++) {
             try {
-                log.debug("Fetching market pairs - attempt {}/{}", attempt, MAX_RETRIES);
+                log.info("Fetching market pairs - attempt {}/{}", attempt, MAX_RETRIES);
 
                 String url = KANGA_BASE_URL + MARKET_PAIRS_ENDPOINT;
                 KangaMarketPairResponse[] apiResponse = restTemplate.getForObject(
                         url,
                         KangaMarketPairResponse[].class
                 );
+                log.info("Response: {}", Arrays.toString(apiResponse));
 
                 if (apiResponse == null || apiResponse.length == 0) {
                     log.warn("Received empty market pairs response");
@@ -115,6 +114,7 @@ class KangaApiClient implements ExchangeApiClient {
                         break;
                     } else {
                         log.warn("Received null order book response for market {}", marketId);
+                        orderBooks.put(marketId, OrderBook.empty(marketId, clock));
                         break;
                     }
 

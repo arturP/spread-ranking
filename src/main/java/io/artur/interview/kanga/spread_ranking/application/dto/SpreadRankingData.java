@@ -7,7 +7,7 @@ import java.util.List;
 
 @Getter
 @AllArgsConstructor
-public class RankingDto {
+public class SpreadRankingData {
 
     private final List<SpreadDto> group1;
     private final List<SpreadDto> group2;

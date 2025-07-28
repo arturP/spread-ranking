@@ -1,6 +1,7 @@
 package io.artur.interview.kanga.spread_ranking.infrastructure.external.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -14,9 +15,13 @@ import java.util.Optional;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class KangaOrderBookResponse {
 
+    @JsonProperty("ticker_id")
     private String tickerId;
+    @JsonProperty("bids")
     private List<List<String>> bids = new ArrayList<>();
+    @JsonProperty("asks")
     private List<List<String>> asks = new ArrayList<>();
+    @JsonProperty("timestamp")
     private Long timestamp;
 
     public Optional<BigDecimal> getBestBidPrice() {

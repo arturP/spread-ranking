@@ -7,8 +7,8 @@ import java.time.Instant;
 
 @Getter
 @AllArgsConstructor
-public class RankingResponse {
+public class SpreadRankingResult {
 
     private final Instant timestamp;
-    private final RankingDto ranking;
+    private final SpreadRankingData ranking;
 }
