@@ -2,8 +2,6 @@ package io.artur.interview.kanga.spread_ranking.api.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.artur.interview.kanga.spread_ranking.domain.model.SpreadRanking;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 
 import java.time.Clock;
 import java.time.Instant;

@@ -17,13 +17,6 @@ public class SpreadDto {
     private final String market;
     private final String spread;
 
-    public static SpreadDto fromDomainSpread(Spread domainSpread) {
-        return new SpreadDto(
-                domainSpread.marketId(),
-                formatSpreadValue(domainSpread.percentage())
-        );
-    }
-
     public static SpreadDto unknown(String marketId) {
         return new SpreadDto(marketId, UNKNOWN_SPREAD);
     }
