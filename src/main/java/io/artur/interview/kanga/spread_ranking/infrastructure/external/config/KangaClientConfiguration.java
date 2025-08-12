@@ -1,11 +1,9 @@
 package io.artur.interview.kanga.spread_ranking.infrastructure.external.config;
 
 import io.artur.interview.kanga.spread_ranking.domain.ExchangeApiClient;
-import io.artur.interview.kanga.spread_ranking.infrastructure.external.KangaApiClient;
 import io.artur.interview.kanga.spread_ranking.infrastructure.external.KangaApiClientOptimized;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.time.Clock;

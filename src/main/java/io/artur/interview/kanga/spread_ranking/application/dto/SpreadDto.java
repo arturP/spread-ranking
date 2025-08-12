@@ -1,7 +1,6 @@
 package io.artur.interview.kanga.spread_ranking.application.dto;
 
 
-import io.artur.interview.kanga.spread_ranking.domain.model.Spread;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
