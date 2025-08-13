@@ -4,8 +4,12 @@ import io.artur.interview.kanga.spread_ranking.domain.ExchangeApiClient;
 import io.artur.interview.kanga.spread_ranking.domain.exceptions.ExchangeApiException;
 import io.artur.interview.kanga.spread_ranking.domain.model.MarketPair;
 import io.artur.interview.kanga.spread_ranking.domain.model.OrderBook;
+import io.artur.interview.kanga.spread_ranking.infrastructure.external.config.KangaApiProperties;
 import io.artur.interview.kanga.spread_ranking.infrastructure.external.dto.KangaMarketPairResponse;
 import io.artur.interview.kanga.spread_ranking.infrastructure.external.dto.KangaOrderBookResponse;
+import io.github.resilience4j.circuitbreaker.CircuitBreaker;
+import io.github.resilience4j.reactor.circuitbreaker.operator.CircuitBreakerOperator;
+import jakarta.annotation.PreDestroy;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
@@ -15,7 +19,6 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 import java.time.Clock;
-import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -25,24 +28,29 @@ import static java.util.stream.Collectors.toConcurrentMap;
 @Slf4j
 public class KangaApiClientOptimized implements ExchangeApiClient {
 
-    private static final String KANGA_BASE_URL = "https://public.kanga.exchange/api";
     private static final String MARKET_PAIRS_ENDPOINT = "/market/pairs";
     private static final String ORDERBOOK_ENDPOINT = "/market/orderbook/{market}";
-    private static final int NUMBER_OF_RETRIES = 3;
-    private static final int OPERATION_TIMEOUT_SEC = 10;
-    private static final int PIPELINE_TIMEOUT_SEC = 30;
 
     private final WebClient webClient;
+    private final CircuitBreaker circuitBreaker;
     private final Clock clock;
+    private final KangaApiProperties properties;
 
-    public KangaApiClientOptimized(WebClient.Builder webClientBuilder, Clock clock) {
-        this.webClient = webClientBuilder
-                .baseUrl(KANGA_BASE_URL)
+    public KangaApiClientOptimized(WebClient webClient, CircuitBreaker circuitBreaker, 
+                                  Clock clock, KangaApiProperties properties) {
+        this.webClient = webClient.mutate()
+                .baseUrl(properties.getBaseUrl())
                 .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .defaultHeader(HttpHeaders.USER_AGENT, "SpreadRankingService/1.0")
-                .codecs(configurer -> configurer.defaultCodecs().maxInMemorySize(1024 * 1024)) // 1MB
                 .build();
+        this.circuitBreaker = circuitBreaker;
         this.clock = clock;
+        this.properties = properties;
+    }
+
+    @PreDestroy
+    public void cleanup() {
+        log.info("Cleaning up KangaApiClient resources");
     }
 
     /**
@@ -58,10 +66,11 @@ public class KangaApiClientOptimized implements ExchangeApiClient {
                     .retrieve()
                     .onStatus(HttpStatusCode::isError, this::handleApiError)
                     .bodyToFlux(KangaMarketPairResponse.class)
-                    .timeout(Duration.ofSeconds(OPERATION_TIMEOUT_SEC))
-                    .retry(NUMBER_OF_RETRIES)
+                    .transformDeferred(CircuitBreakerOperator.of(circuitBreaker))
+                    .timeout(properties.getOperationTimeout())
+                    .retry(properties.getRetryCount())
                     .collectList()
-                    .block(Duration.ofSeconds(PIPELINE_TIMEOUT_SEC));
+                    .block(properties.getPipelineTimeout());
 
             if (apiResponse == null || apiResponse.isEmpty()) {
                 log.warn("Received empty market pairs response from Kanga API");
@@ -86,6 +95,10 @@ public class KangaApiClientOptimized implements ExchangeApiClient {
      * Fetches orderbook for specific market
      */
     public OrderBook getOrderBook(String marketId) {
+        if (marketId == null || marketId.trim().isEmpty()) {
+            throw new IllegalArgumentException("Market ID cannot be null or empty");
+        }
+        
         log.debug("Fetching orderbook for market: {}", marketId);
 
         try {
@@ -95,9 +108,10 @@ public class KangaApiClientOptimized implements ExchangeApiClient {
                     .retrieve()
                     .onStatus(HttpStatusCode::isError, this::handleApiError)
                     .bodyToMono(KangaOrderBookResponse.class)
-                    .timeout(Duration.ofSeconds(OPERATION_TIMEOUT_SEC))
-                    .retry(NUMBER_OF_RETRIES)
-                    .block(Duration.ofSeconds(PIPELINE_TIMEOUT_SEC));
+                    .transformDeferred(CircuitBreakerOperator.of(circuitBreaker))
+                    .timeout(properties.getOperationTimeout())
+                    .retry(properties.getRetryCount())
+                    .block(properties.getPipelineTimeout());
 
             if (apiResponse == null) {
                 log.warn("Received null orderbook response for market: {}", marketId);
@@ -122,6 +136,11 @@ public class KangaApiClientOptimized implements ExchangeApiClient {
      * Fetches orderbooks for multiple markets in parallel
      */
     public Map<String, OrderBook> getOrderBooks(List<String> marketIds) {
+        if (marketIds == null || marketIds.isEmpty()) {
+            log.warn("Market IDs list is null or empty");
+            return Map.of();
+        }
+        
         log.info("Fetching orderbooks for {} markets", marketIds.size());
 
         Map<String, OrderBook> orderBooks = marketIds.parallelStream()

@@ -1,0 +1,39 @@
+kanga:
+  api:
+    base-url: https://public.kanga.exchange/api
+    operation-timeout: PT10S
+    pipeline-timeout: PT30S
+    retry-count: 3
+    max-in-memory-size: 1048576  # 1MB
+    
+    connection-pool:
+      max-connections: 100
+      max-idle-time: 20
+      max-life-time: 60
+      pending-acquire-timeout: PT45S
+      evict-in-background: PT120S
+      
+    circuit-breaker:
+      failure-rate-threshold: 50
+      slow-call-rate-threshold: 50
+      slow-call-duration-threshold: PT5S
+      sliding-window-size: 10
+      minimum-number-of-calls: 5
+      wait-duration-in-open-state: PT30S
+      permitted-number-of-calls-in-half-open-state: 3
+
+# Enable circuit breaker metrics
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,metrics,circuitbreakers
+  endpoint:
+    health:
+      show-details: always
+
+# Logging configuration
+logging:
+  level:
+    io.artur.interview.kanga.spread_ranking.infrastructure.external: INFO
+    io.github.resilience4j: INFO

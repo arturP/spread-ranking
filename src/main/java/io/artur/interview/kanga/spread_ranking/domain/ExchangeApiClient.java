@@ -9,5 +9,6 @@ import java.util.Map;
 public interface ExchangeApiClient {
 
     List<MarketPair> getMarketPairs();
+    OrderBook getOrderBook(String marketId);
     Map<String, OrderBook> getOrderBooks(List<String> marketIds);
 }

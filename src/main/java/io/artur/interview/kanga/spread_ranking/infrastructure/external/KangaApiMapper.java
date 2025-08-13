@@ -27,12 +27,12 @@ class KangaApiMapper {
         if (response == null) {
             return OrderBook.empty("", clock);
         }
-        Optional<BigDecimal> betsBid = response.getBestBidPrice();
+        Optional<BigDecimal> bestBid = response.getBestBidPrice();
         Optional<BigDecimal> bestAsk = response.getBestAskPrice();
 
         return new OrderBook(
                 response.getTickerId(),
-                betsBid.orElse(null),
+                bestBid.orElse(null),
                 bestAsk.orElse(null),
                 Instant.ofEpochMilli(response.getTimestamp() != null ? response.getTimestamp() : Instant.now(clock).toEpochMilli()));
     }
