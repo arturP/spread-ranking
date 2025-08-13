@@ -25,7 +25,7 @@ import java.time.Instant;
 @Slf4j
 @ControllerAdvice
 @RequiredArgsConstructor
-public class GlobalExceptionHandler {
+class GlobalExceptionHandler {
 
     private final Clock clock;
 

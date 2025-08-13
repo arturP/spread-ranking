@@ -15,7 +15,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  */
 @Repository
 @Slf4j
-public class InMemoryMarketDataRepository implements MarketDataRepository {
+class InMemoryMarketDataRepository implements MarketDataRepository {
 
     private final ConcurrentHashMap<String, Market> markets = new ConcurrentHashMap<>();
     private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();

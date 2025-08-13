@@ -19,7 +19,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  */
 @Repository
 @Slf4j
-public class InMemorySpreadRankingRepository implements SpreadRankingRepository {
+class InMemorySpreadRankingRepository implements SpreadRankingRepository {
 
     private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
     private final Clock clock;

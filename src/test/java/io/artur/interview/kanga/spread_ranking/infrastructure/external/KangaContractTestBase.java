@@ -12,7 +12,7 @@ import org.springframework.test.context.TestPropertySource;
 @TestPropertySource(properties = {
     "logging.level.io.artur.interview.kanga.spread_ranking=DEBUG"
 })
-public abstract class KangaContractTestBase {
+abstract class KangaContractTestBase {
 
     @BeforeEach
     public void setup() {

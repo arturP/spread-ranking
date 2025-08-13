@@ -14,7 +14,7 @@ import java.io.IOException;
 import java.util.List;
 
 @Configuration
-public class RestTemplateConfig {
+class RestTemplateConfig {
 
     @Bean
     RestTemplate restTemplate() {

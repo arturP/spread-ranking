@@ -19,7 +19,7 @@ import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
 @Configuration
-public class KangaClientConfiguration {
+class KangaClientConfiguration {
 
     @Bean
     public ConnectionProvider kangaConnectionProvider(KangaApiProperties properties) {

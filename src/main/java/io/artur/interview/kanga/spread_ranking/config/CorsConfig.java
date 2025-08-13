@@ -17,7 +17,7 @@ import java.util.List;
  */
 @Configuration
 @Slf4j
-public class CorsConfig {
+class CorsConfig {
 
     @Value("${app.cors.allowed-origins:http://localhost:3000,http://localhost:8080}")
     private List<String> allowedOrigins;

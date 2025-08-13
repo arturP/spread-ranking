@@ -52,6 +52,11 @@ app:
     allow-credentials: true
     max-age-seconds: 3600
 
+# Spring configuration
+spring:
+  application:
+    name: spread-ranking
+
 # Logging configuration
 logging:
   level:
