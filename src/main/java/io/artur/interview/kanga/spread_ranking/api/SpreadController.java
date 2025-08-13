@@ -7,16 +7,17 @@ import io.artur.interview.kanga.spread_ranking.domain.exceptions.RankingNotAvail
 import io.artur.interview.kanga.spread_ranking.domain.exceptions.SpreadCalculationException;
 import io.artur.interview.kanga.spread_ranking.domain.model.SpreadRanking;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Pattern;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Optional;
 
 import java.time.Clock;
 import java.time.Instant;
@@ -33,18 +34,27 @@ class SpreadController {
 
     @GetMapping("/ranking")
     @PreAuthorize("hasRole('API_USER')")
-    public ResponseEntity<SpreadRankingApiResponse> getRanking() {
-        log.info("Received request for current spread ranking");
+    public ResponseEntity<SpreadRankingApiResponse> getRanking(
+            @RequestParam(value = "force", required = false, defaultValue = "false") 
+            @Pattern(regexp = "^(true|false)$", message = "Force parameter must be 'true' or 'false'") 
+            String forceRefresh,
+            
+            @RequestParam(value = "format", required = false, defaultValue = "json")
+            @Pattern(regexp = "^(json)$", message = "Format must be 'json'")
+            String format) {
+        
+        log.info("Received request for current spread ranking - force: {}, format: {}", forceRefresh, format);
         try {
             SpreadRanking ranking;
+            boolean shouldForceRefresh = Boolean.parseBoolean(forceRefresh);
             
-            if (spreadRankingService.isRankingCurrent()) {
+            if (!shouldForceRefresh && spreadRankingService.isRankingCurrent()) {
                 ranking = spreadRankingService.getCurrentRanking();
                 log.debug("Using cached ranking");
             } else {
                 ranking = spreadRankingService.calculateSpreadRanking();
                 spreadRankingService.storeSpreadRanking(ranking);
-                log.info("Calculated fresh ranking");
+                log.info("Calculated fresh ranking (forced: {})", shouldForceRefresh);
             }
             
             SpreadRankingApiResponse response = SpreadRankingApiResponse.create(ranking, clock);
@@ -92,7 +102,7 @@ class SpreadController {
 
             CalculationApiResponse response = CalculationApiResponse.builder()
                     .message("Calculation failed: " + ex.getMessage())
-                    .timestamp(Instant.now())
+                    .timestamp(Instant.now(clock))
                     .status("ERROR")
                     .error(ex.getMessage())
                     .build();
@@ -104,7 +114,7 @@ class SpreadController {
 
             CalculationApiResponse response = CalculationApiResponse.builder()
                     .message("Internal server error occurred")
-                    .timestamp(Instant.now())
+                    .timestamp(Instant.now(clock))
                     .status("ERROR")
                     .error("An unexpected error occurred. Please try again later.")
                     .build();

@@ -27,6 +27,9 @@ import static io.artur.interview.kanga.spread_ranking.domain.model.SpreadCategor
 public class SpreadCalculationService {
 
     private static final int DIVIDE_SCALE = 4;
+    private static final BigDecimal HALF = new BigDecimal("0.5");
+    private static final BigDecimal HUNDRED = new BigDecimal("100");
+    private static final BigDecimal HIGH_SPREAD_THRESHOLD = new BigDecimal("2.0");
 
     public Spread calculateSpread(final Market market) {
         if (market.askPrice() == null || market.bidPrice() == null) {
@@ -34,14 +37,13 @@ public class SpreadCalculationService {
         }
 
         final BigDecimal spreadPctValue = (market.askPrice().subtract(market.bidPrice()))
-                .divide(new BigDecimal("0.5")
-                        .multiply(market.askPrice().add(market.bidPrice())), DIVIDE_SCALE, RoundingMode.HALF_UP)
-                .multiply(new BigDecimal("100"));
+                .divide(HALF.multiply(market.askPrice().add(market.bidPrice())), DIVIDE_SCALE, RoundingMode.HALF_UP)
+                .multiply(HUNDRED);
         return new Spread(market.tickerId(), spreadPctValue, categorizeSpread(spreadPctValue));
     }
 
     private SpreadCategory categorizeSpread(final BigDecimal spreadPctValue) {
-        if (spreadPctValue.compareTo(new BigDecimal("2.0")) > 0) {
+        if (spreadPctValue.compareTo(HIGH_SPREAD_THRESHOLD) > 0) {
             return HIGH_SPREAD;
         }
         return LOW_SPREAD;

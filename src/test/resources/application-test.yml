@@ -1,0 +1,43 @@
+# Test configuration for contract tests
+kanga:
+  api:
+    # Will be overridden by @TestPropertySource in individual tests
+    base-url: http://localhost:8089
+    operation-timeout: PT2S
+    pipeline-timeout: PT5S
+    retry-count: 1
+    max-in-memory-size: 1048576
+    
+    connection-pool:
+      max-connections: 10
+      max-idle-time: 5
+      max-life-time: 30
+      pending-acquire-timeout: PT10S
+      evict-in-background: PT30S
+      
+    circuit-breaker:
+      failure-rate-threshold: 50
+      slow-call-rate-threshold: 50
+      slow-call-duration-threshold: PT2S
+      sliding-window-size: 5
+      minimum-number-of-calls: 3
+      wait-duration-in-open-state: PT10S
+      permitted-number-of-calls-in-half-open-state: 2
+
+# Spring Cloud Contract Configuration
+spring:
+  cloud:
+    contract:
+      verifier:
+        stubs-mode: LOCAL
+
+# Logging for tests
+logging:
+  level:
+    io.artur.interview.kanga.spread_ranking: DEBUG
+    org.springframework.cloud.contract: DEBUG
+    com.github.tomakehurst.wiremock: INFO
+    org.springframework.web.reactive.function.client: DEBUG
+
+# Disable security for contract tests
+spring.security.enabled: false

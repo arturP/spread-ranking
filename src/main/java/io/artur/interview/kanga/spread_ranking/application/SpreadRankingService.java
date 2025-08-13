@@ -18,6 +18,7 @@ import java.util.Objects;
 
 import static io.artur.interview.kanga.spread_ranking.domain.model.SpreadCategory.*;
 import static java.util.Comparator.comparing;
+import java.util.Comparator;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toList;
 
@@ -180,8 +181,32 @@ public class SpreadRankingService {
             return List.of();
         }
 
-        return spreads.stream()
-                .sorted(comparing(Spread::marketId, String.CASE_INSENSITIVE_ORDER))
+        // Sort by percentage first (ascending for LOW_SPREAD, descending for HIGH_SPREAD),
+        // then by market ID for consistent ordering
+        Comparator<Spread> comparator;
+        
+        if (groupName.contains("Group 1")) {
+            // LOW_SPREAD: Sort by percentage ascending (lowest spreads first), then by market ID
+            comparator = Comparator
+                    .comparing(Spread::percentage, Comparator.nullsLast(Comparator.naturalOrder()))
+                    .thenComparing(Spread::marketId, String.CASE_INSENSITIVE_ORDER);
+        } else if (groupName.contains("Group 2")) {
+            // HIGH_SPREAD: Sort by percentage ascending (lowest spreads first), then by market ID
+            comparator = Comparator
+                    .comparing(Spread::percentage, Comparator.nullsLast(Comparator.naturalOrder()))
+                    .thenComparing(Spread::marketId, String.CASE_INSENSITIVE_ORDER);
+        } else {
+            // UNKNOWN: Sort by market ID only (no percentage available)
+            comparator = Comparator.comparing(Spread::marketId, String.CASE_INSENSITIVE_ORDER);
+        }
+
+        List<Spread> sortedSpreads = spreads.stream()
+                .sorted(comparator)
                 .toList();
+                
+        log.debug("Sorted {} spreads for group {} by percentage and market ID", 
+                sortedSpreads.size(), groupName);
+                
+        return sortedSpreads;
     }
 }

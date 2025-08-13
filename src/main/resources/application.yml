@@ -32,6 +32,26 @@ management:
     health:
       show-details: always
 
+# Application configuration
+app:
+  spread-ranking:
+    validity-duration: PT5M
+  cors:
+    allowed-origins: 
+      - http://localhost:3000
+      - http://localhost:8080
+      - http://localhost:4200
+    allowed-methods:
+      - GET
+      - POST
+      - PUT
+      - DELETE
+      - OPTIONS
+    allowed-headers: "*"
+    exposed-headers: []
+    allow-credentials: true
+    max-age-seconds: 3600
+
 # Logging configuration
 logging:
   level:
