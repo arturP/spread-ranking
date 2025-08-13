@@ -161,7 +161,7 @@ class SpreadRankingServiceTest {
         assertThat(result).isNotNull();
         assertThat(result.getLowSpreadMarkets())
                 .extracting(Spread::marketId)
-                .containsExactly("ADA_GBP", "BTC_USD", "ZEC_EUR");
+                .containsExactly("BTC_USD", "ADA_GBP", "ZEC_EUR");
     }
 
     @Test
